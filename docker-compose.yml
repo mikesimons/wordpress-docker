@@ -1,0 +1,41 @@
+version: '2'
+
+services:
+  database:
+    image: mariadb:10
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+    volumes:
+      - wordpress_data:/var/lib/mysql
+
+  redis:
+    image: redis:3.0-alpine
+
+  wordpress:
+    image: wp-wordpress:latest
+    ports:
+      - 9000
+    volumes:
+      - ./public_html:/var/www/html
+
+  blackfire:
+    image: blackfire/blackfire
+    environment:
+      BLACKFIRE_SERVER_ID: "$BLACKFIRE_SERVER_ID"
+      BLACKFIRE_SERVER_TOKEN: "$BLACKFIRE_SERVER_TOKEN"
+
+  webserver:
+    image: wp-nginx
+    ports:
+      - 3000:443
+    volumes:
+      - ./public_html/:/var/www/html
+      - ./ssl/local/:/etc/ssl
+    links:
+      - wordpress:wordpress
+
+volumes:
+  wordpress_data:
